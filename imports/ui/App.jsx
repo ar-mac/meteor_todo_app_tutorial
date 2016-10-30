@@ -8,6 +8,7 @@ class App extends Component {
     super(props, context);
 
     this.state = {
+      hideCompleted: false,
       taskName: ""
     }
   }
@@ -27,8 +28,14 @@ class App extends Component {
     this.setState({taskName: event.target.value})
   }
 
+  toggleHideCompleted() {
+    this.setState({hideCompleted: !this.state.hideCompleted})
+  }
+
   renderTasks() {
-    return this.props.tasks.map(task => {
+    let tasks = this.props.tasks;
+    if (this.state.hideCompleted) tasks = tasks.filter(task => !task.completed);
+    return tasks.map(task => {
       return <Task key={task._id} task={task}/>;
     })
   };
@@ -37,7 +44,17 @@ class App extends Component {
     return (
       <div className="container">
         <header>
-          <h1>Todo List</h1>
+          <h1>Todo List ({this.props.incompleteCount})</h1>
+
+          <label className="hide-completed">
+            <input
+              type="checkbox"
+              readOnly
+              checked={this.state.hideCompleted}
+              onClick={this.toggleHideCompleted.bind(this)}
+            />
+            Hide Completed Tasks
+          </label>
 
           <form className="new-task" onSubmit={this.handleSubmit.bind(this)}>
             <input
@@ -55,11 +72,13 @@ class App extends Component {
 }
 
 App.propTypes = {
-  tasks: PropTypes.array.isRequired
+  tasks: PropTypes.array.isRequired,
+  incompleteCount: PropTypes.number.isRequired
 };
 
 export default createContainer(() => {
   return {
-    tasks: Tasks.find({}, {sort: {createdAt: -1}}).fetch()
+    tasks: Tasks.find({}, {sort: {createdAt: -1}}).fetch(),
+    incompleteCount: Tasks.find({completed: {$ne: true}}).count()
   };
 }, App);
