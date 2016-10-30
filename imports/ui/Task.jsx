@@ -2,10 +2,10 @@ import React, {Component, PropTypes} from "react";
 import {Tasks} from "../api/tasks";
 
 export default class Task extends Component {
-  toggleChecked() {
+  toggleCompleted() {
     Tasks.update(this.props.task._id, {
-      $set: {checked: !this.props.task.checked}
-    })
+      $set: {completed: !this.props.task.completed}
+    });
   };
 
   deleteTask() {
@@ -13,7 +13,7 @@ export default class Task extends Component {
   }
 
   render() {
-    const taskClassName = this.props.task.checked ? 'checked' : '';
+    const taskClassName = this.props.task.completed ? 'checked' : '';
 
     return (
       <li className={taskClassName}>
@@ -24,8 +24,8 @@ export default class Task extends Component {
         <input
           type="checkbox"
           readOnly
-          defaultChecked={this.props.task.checked}
-          onClick={this.toggleChecked.bind(this)}
+          defaultChecked={this.props.task.completed}
+          onClick={this.toggleCompleted.bind(this)}
         />
 
         <span className="text">{this.props.task.text}</span>
