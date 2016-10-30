@@ -12,6 +12,10 @@ export default class Task extends Component {
     Tasks.remove(this.props.task._id);
   }
 
+  taskAuthor() {
+    if (this.props.task.userName) return `${this.props.task.userName}: `;
+  }
+
   render() {
     const taskClassName = this.props.task.completed ? 'checked' : '';
 
@@ -28,7 +32,9 @@ export default class Task extends Component {
           onClick={this.toggleCompleted.bind(this)}
         />
 
-        <span className="text">{this.props.task.text}</span>
+        <span className="text">
+          {this.taskAuthor()}{this.props.task.text}
+        </span>
       </li>
     );
   }
