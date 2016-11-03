@@ -1,15 +1,12 @@
 import React, {Component, PropTypes} from "react";
-import {Tasks} from "../api/tasks";
 
 export default class Task extends Component {
   toggleCompleted() {
-    Tasks.update(this.props.task._id, {
-      $set: {completed: !this.props.task.completed}
-    });
-  };
+    Meteor.call("tasks.setCompleted", this.props.task._id, !this.props.task.completed);
+  }
 
   deleteTask() {
-    Tasks.remove(this.props.task._id);
+    Meteor.call("tasks.remove", this.props.task._id);
   }
 
   taskAuthor() {

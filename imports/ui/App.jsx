@@ -18,12 +18,7 @@ class App extends Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    Tasks.insert({
-      text: this.state.taskName,
-      createdAt: new Date(),
-      owner: Meteor.userId(),
-      userName: Meteor.user().username
-    });
+    Meteor.call("tasks.insert", this.state.taskName);
 
     this.setState({taskName: ""})
   }
@@ -48,9 +43,8 @@ class App extends Component {
           />
         </form>
       )
-    } else {
-      return null
     }
+    return null
   }
 
   renderTasks() {
