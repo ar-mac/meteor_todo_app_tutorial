@@ -20,7 +20,7 @@ Meteor.methods({
     check(taskId, String);
     if (!this.userId) throw new Meteor.Error("not-authorized");
 
-    const taskToRemove = Meteor.tasks.findOne({owner: {$eq: this.userId}});
+    const taskToRemove = Tasks.findOne({_id: {$eq: taskId}, owner: {$eq: this.userId}});
     if (taskToRemove) {
       Tasks.remove(taskId);
     } else {
