@@ -50,8 +50,11 @@ class App extends Component {
   renderTasks() {
     let tasks = this.props.tasks;
     if (this.state.hideCompleted) tasks = tasks.filter(task => !task.completed);
+    const currentUserId = this.props.currentUser && this.props.currentUser._id;
+
     return tasks.map(task => {
-      return <Task key={task._id} task={task}/>;
+      const ownedByCurrent = task.owner === currentUserId;
+      return <Task key={task._id} task={task} ownedByCurrent={ownedByCurrent}/>;
     })
   };
 
@@ -88,6 +91,8 @@ App.propTypes = {
 };
 
 export default createContainer(() => {
+  Meteor.subscribe('tasks');
+
   return {
     tasks: Tasks.find({}, {sort: {createdAt: -1}}).fetch(),
     incompleteCount: Tasks.find({completed: {$ne: true}}).count(),

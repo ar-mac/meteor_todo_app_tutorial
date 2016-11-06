@@ -4,6 +4,17 @@ import {check} from "meteor/check";
 
 export const Tasks = new Mongo.Collection("tasks");
 
+if (Meteor.isServer) {
+  Meteor.publish('tasks', function sth() {
+    return Tasks.find({
+      $or: [
+        {private: {$ne: true}},
+        {owner: this.userId}
+      ]
+    });
+  })
+}
+
 Meteor.methods({
   "tasks.insert"(text) {
     check(text, String);
@@ -20,17 +31,26 @@ Meteor.methods({
     check(taskId, String);
     if (!this.userId) throw new Meteor.Error("not-authorized");
 
-    const taskToRemove = Tasks.findOne({_id: {$eq: taskId}, owner: {$eq: this.userId}});
-    if (taskToRemove) {
+    const foundTask = Tasks.findOne({_id: {$eq: taskId}, owner: {$eq: this.userId}});
+    if (foundTask) {
       Tasks.remove(taskId);
     } else {
       throw new Meteor.Error("not-found");
     }
   },
-  "tasks.setCompleted"(taskId, setCompleted) {
+  "tasks.update"(taskId, attribute, value) {
     check(taskId, String);
-    check(setCompleted, Boolean);
+    check(attribute, String);
 
-    Tasks.update(taskId, {$set: {completed: setCompleted}})
+    if (!this.userId) throw new Meteor.Error("not-authorized");
+
+    const foundTask = Tasks.findOne({_id: {$eq: taskId}, owner: {$eq: this.userId}});
+
+    if (foundTask) {
+      Tasks.update(taskId, {$set: {[attribute]: value}})
+    } else {
+      throw new Meteor.Error("not-found");
+    }
+
   }
 });

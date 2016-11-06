@@ -1,8 +1,14 @@
 import React, {Component, PropTypes} from "react";
+import {Meteor} from "meteor/meteor";
+import classNamesHandler from "classnames";
 
 export default class Task extends Component {
   toggleCompleted() {
-    Meteor.call("tasks.setCompleted", this.props.task._id, !this.props.task.completed);
+    Meteor.call("tasks.update", this.props.task._id, "completed", !this.props.task.completed);
+  }
+
+  togglePrivate() {
+    Meteor.call("tasks.update", this.props.task._id, "private", !this.props.task.private);
   }
 
   deleteTask() {
@@ -10,17 +16,33 @@ export default class Task extends Component {
   }
 
   taskAuthor() {
-    if (this.props.task.userName) return `${this.props.task.userName}: `;
+    if (this.props.task.username) return `${this.props.task.username}: `;
+  }
+
+  privateButton() {
+    if (this.props.ownedByCurrent) {
+      return (
+        <button className="toggle-private" onClick={this.togglePrivate.bind(this)}>
+          {this.props.task.private ? "is Private" : "is Public"}
+        </button>
+      )
+    }
   }
 
   render() {
-    const taskClassName = this.props.task.completed ? 'checked' : '';
+    const taskClassName = classNamesHandler({
+      checked: this.props.task.completed,
+      private: this.props.task.private,
+    });
 
     return (
       <li className={taskClassName}>
-        <button className="delete" onClick={this.deleteTask.bind(this)}>
-          &times;
-        </button>
+        { this.props.ownedByCurrent ? (
+          <button className="delete" onClick={this.deleteTask.bind(this)}>
+            &times;
+          </button>
+          ) : ''
+        }
 
         <input
           type="checkbox"
@@ -28,6 +50,8 @@ export default class Task extends Component {
           defaultChecked={this.props.task.completed}
           onClick={this.toggleCompleted.bind(this)}
         />
+
+        {this.privateButton()}
 
         <span className="text">
           {this.taskAuthor()}{this.props.task.text}
@@ -38,5 +62,6 @@ export default class Task extends Component {
 }
 
 Task.propTypes = {
-  task: PropTypes.object.isRequired
+  task: PropTypes.object.isRequired,
+  ownedByCurrent: PropTypes.bool.isRequired
 };
